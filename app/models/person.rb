@@ -1,9 +1,17 @@
 class Person < ApplicationRecord
-  before_validation :set_age
+  before_validation :set_age, :set_life_expectancy
   before_save :calculate_first_SS_check
 
   def :set_age
     self[:age] = Date.today - self[:birthday]
+  end
+
+  def :set_life_expectancy
+    if self[:sex] == 'M'
+      self[:life_expectancy] = 76
+    else
+      self[:life_expectancy] = 81
+    end
   end
 
   def :calculate_first_SS_check
@@ -21,12 +29,12 @@ class Person < ApplicationRecord
     self[:estimated_SS_benefit] = monthly_income
   end
 
-  def calculate_AMIE(age, current_income)
+  private
+    def calculate_AMIE(age, current_income)
 
-  end
+    end
 
-  def convert_AMIE_to_benefits(monthly_earnings)
+    def convert_AMIE_to_benefits(monthly_earnings)
 
-  end
-
+    end
 end
