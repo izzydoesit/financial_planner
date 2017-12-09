@@ -1,5 +1,8 @@
 Rails.application.routes.draw do
-  get 'people/new'
+
+  resources :people
+  
+  root 'people#new'
 
   get 'people/show'
 
