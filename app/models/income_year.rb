@@ -1,0 +1,2 @@
+class IncomeYear < ApplicationRecord
+end
