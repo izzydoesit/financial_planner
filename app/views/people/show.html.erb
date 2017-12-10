@@ -1,2 +1,15 @@
 <h1>People#show</h1>
 <p>Find me in app/views/people/show.html.erb</p>
+
+<div class="container">
+  <p>birthday:<%= @person.birthday %></p>
+  <p>age:<%= @person.age %></p>
+  <p>sex:<%= @person.sex %></p>
+  <p>current_income:<%= number_to_currency(@person.current_income) %></p>
+  <p>life_expectancy:<%= @person.life_expectancy %></p>
+  <p>claim_date:<%= @person.claim_date %></p>
+  <p>spousal_benefits:<%= @person.spousal_benefits %></p>
+  <p>estimated_ss_benefit:<%= @person.estimated_ss_benefit %></p>
+</div>
+
+<%= link_to '<~~~ Back', new_person_path %>
