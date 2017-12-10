@@ -1,36 +1,44 @@
-<h1>People#new</h1>
-<p>Find me in app/views/people/new.html.erb</p>
-
 <div class="container">
 
-  <%= form_for @person do |f| %>
-
-
-
-    <div class="sex-field">
-      <%= f.label 'Sex: ' %>
-      <%= f.label 'Male' %>
-      <%= f.radio_button :sex, 'M' %>
-      <%= f.label 'Female' %>
-      <%= f.radio_button :sex, 'F' %>
+  <div class="row">
+    <div class="title col-md-8 centered">
+      <h1 class="h1 centered">How much will your Social Security check be?</h1>
+      <p class="lead centered">Fill out the form to calculate...</p>
     </div>
+  </div>
 
-    <div class="birthday-field">
-      <%= f.label 'Birthday: ' %>
-      <%= f.date_field :birthday %>
+  <div class="row">
+    <div class="centered person-form col-md-5">
+
+      <%= form_for @person do |f| %>
+
+        <div class="sex-field">
+          <%= f.label 'Sex: ' %>
+          <%= f.label 'Male' %>
+          <%= f.radio_button :sex, 'M' %>
+          <%= f.label 'Female' %>
+          <%= f.radio_button :sex, 'F' %>
+        </div>
+
+        <div class="birthday-field">
+          <%= f.label 'Birthday: ' %>
+          <%= f.date_field :birthday %>
+        </div>
+
+        <div class="current-income-field">
+          <%= f.label :current_income, 'Current Income: ' %>
+          <%= f.text_field :current_income %>
+        </div>
+
+        <div class="claim-date-field">
+          <%= f.label 'Desired Claim Date: ' %>
+          <%= f.date_field :claim_date %>
+        </div>
+
+        <%= f.submit 'Submit', class: "btn btn-primary" %>
+      <% end %>
+
     </div>
+  </div>
 
-    <div class="current-income-field">
-      <%= f.label :current_income, 'Current Income: ' %>
-      <%= f.text_field :current_income %>
-    </div>
-
-    <div class="claim-date-field">
-      <%= f.label 'Desired Claim Date: ' %>
-      <%= f.date_field :claim_date %>
-    </div>
-
-    <%= f.submit 'Submit' %>
-  <% end %>
-    
 </div>
