@@ -16,6 +16,11 @@ class PeopleController < ApplicationController
 
   def show
     @person = Person.find(params[:id])
+    if !@person.spouse.nil? && @person.spousal_benefit > @person.adjusted_benefit
+      @optimal_claim = 'Spouse'
+    else
+      @optimal_claim = 'Independent'
+    end
   end
 
   private

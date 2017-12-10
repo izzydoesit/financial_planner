@@ -15,11 +15,12 @@
       <p>full retirement age: <%= @person.full_retirement_age %></p>
       <p>full retirement date: <%= @person.birthday >> (@person.full_retirement_age * 12) %></p>
       <p>life expectancy: <%= @person.life_expectancy %></p>
-      <p>spousal benefits: <%= @person.spousal_benefits %></p>
+      <p>spousal benefit: <%= @person.spousal_benefit %></p>
       <p>claim date: <%= @person.claim_date %></p>
       <p>Monthly AMIE: <%= number_to_currency(@person.monthly_amie_base) %></p>
       <p>estimated maximum benefit: <%= number_to_currency(@person.maximum_benefit) %></p>
       <p>estimated adjusted benefit: <%= number_to_currency(@person.adjusted_benefit) %></p>
+      <p>optimal claim strategy: <%= @optimal_claim %></p>
     </div>
   </div>
 
