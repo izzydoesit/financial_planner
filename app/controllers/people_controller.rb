@@ -8,10 +8,6 @@ class PeopleController < ApplicationController
   def create
     @person = Person.new(person_params)
     @person.set_current_income(params[:person][:income_years_attributes]['0'][:income])
-    @person.set_age(params[:person][:birthday])
-    @person.set_life_expectancy(params[:person][:sex])
-    @person.backwards_project_income(@person.age - 22)
-    @person.forwards_project_income(67 - @person.age)
     
     if @person.save
       redirect_to @person, alert: "Person created successfully!"

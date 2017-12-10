@@ -2,70 +2,86 @@ class Person < ApplicationRecord
   has_many :income_years
   accepts_nested_attributes_for :income_years, reject_if: :all_blank
   
+  before_save :set_age, :set_life_expectancy
+  after_save :create_current_income_record, :backwards_project_income, :forwards_project_income, :calculate_monthly_amie
   # before_save :calculate_first_SS_check
+
   def set_current_income(income)
     self[:current_income] = income
   end
 
-  def set_age(birthday)
-    self[:age] = ((Date.today - birthday.to_date)/365.25).to_i
+  def set_age
+    self[:age] = ((Date.today - self[:birthday].to_date)/365.25).to_i
   end
 
-  def set_life_expectancy(sex)
-    if sex == 'M'
+  def set_life_expectancy
+    if self[:sex] == 'M'
       self[:life_expectancy] = 76
     else
       self[:life_expectancy] = 81
     end
   end
 
+  def create_current_income_record
+    self.income_years.create(income: self[:current_income], year: Date.today.year)
+  end
+
   def calculate_first_SS_check
-    # figure out income base
-    current_age = self[:age]
-    years_backwards = current_age - 22
-    years_forwards = 67 - current_age
-    backwards_project_income(years_backwards) # populate earnings history
-    forwards_project_income(years_forwards)
+    # project earnings history
+    backwards_project_income 
+    forwards_project_income
     # calculate Average Monthly Indexed Earnings (top 35 earning years)
-    average_monthly_indexed_earnings = calculate_AMIE(self[:age], self[:current_income])
+    calculate_monthly_amie
     # convert AMIE to benefits
-    monthly_income = convert_AMIE_to_benefits(AMIE)
+    calculate_pia
     # calculate spouse
+    compare_spousal_benefit
     # adjust benefits according to year they take
+    adjust_benefits
     # benefit reduction +/- 36 months
 
     self[:estimated_SS_benefit] = monthly_income
   end
 
-  def backwards_project_income(years)
+  def backwards_project_income
+    # every year's income is previous year's income minus 2%
+    years_to_project = self[:age] - 22
     this_year = Date.today.year
     this_years_income = self[:current_income]
-    # for every year between current age and 22
-    years.times do 
-      # income is previous year's income minus 2%
+
+    years_to_project.times do 
       this_year = this_year - 1 
       this_years_income = (this_years_income * 0.98).round(2)
-      IncomeYear.create(person_id: self[:id], year: this_year, income: this_years_income)
+      self.income_years.create(year: this_year, income: this_years_income)
     end
   end 
 
-  def forwards_project_income(years)
+  def forwards_project_income
+    # every year's income is previous year's income plus 2%
+    years_to_project = 70 - self[:age]
     this_year = Date.today.year
     this_years_income = self[:current_income]
-    # for every year between current age and 67
-    years.times do 
-      # income is previous year's income plus 2%
+
+    years_to_project.times do 
       this_year = this_year + 1 
       this_years_income = (this_years_income * 1.02).round(2)
-      IncomeYear.create(person_id: self[:id], year: this_year, income: this_years_income)
+      self.income_years.create(year: this_year, income: this_years_income)
     end
   end
 
-  def calculate_amie(age, current_income)
+  def calculate_monthly_amie
+    # average income of top 35 years
+    incomes = self.income_years.map { |iy| iy.income }.sort.last(35)
+    self[:monthly_amie_base] = ((incomes.inject(0) { |sum, i| sum + i } / incomes.size) / 12).round(2)
+  end
+
+  def calculate_pia
 
   end
 
-  def convert_amie_to_benefits(monthly_earnings)
+  def compare_spousal_benefit
+  end
 
+  def adjust_benefits
   end
 end
