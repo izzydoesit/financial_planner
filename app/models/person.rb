@@ -1,7 +1,11 @@
 class Person < ApplicationRecord
   has_many :income_years
-  accepts_nested_attributes_for :income_year
+  accepts_nested_attributes_for :income_years, reject_if: :all_blank
+  
   # before_save :calculate_first_SS_check
+  def set_current_income(income)
+    self[:current_income] = income
+  end
 
   def set_age(birthday)
     self[:age] = ((Date.today - birthday.to_date)/365.25).to_i
