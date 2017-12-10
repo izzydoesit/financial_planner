@@ -28,10 +28,13 @@ ActiveRecord::Schema.define(version: 20171209211227) do
     t.float    "current_income"
     t.integer  "life_expectancy"
     t.date     "claim_date"
-    t.boolean  "spousal_benefits",     default: false
-    t.float    "estimated_ss_benefit"
-    t.datetime "created_at",                           null: false
-    t.datetime "updated_at",                           null: false
+    t.boolean  "spousal_benefits",  default: false
+    t.float    "monthly_amie_base"
+    t.float    "pia"
+    t.float    "maximum_benefit"
+    t.float    "adjusted_benefit"
+    t.datetime "created_at",                        null: false
+    t.datetime "updated_at",                        null: false
   end
 
 end

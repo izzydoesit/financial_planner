@@ -8,7 +8,10 @@ class CreatePeople < ActiveRecord::Migration[5.0]
       t.integer :life_expectancy
       t.date :claim_date
       t.boolean :spousal_benefits, default: false
-      t.float :estimated_ss_benefit
+      t.float :monthly_amie_base
+      t.float :pia
+      t.float :maximum_benefit
+      t.float :adjusted_benefit
 
       t.timestamps
     end
