@@ -37,27 +37,35 @@ class Person < ApplicationRecord
     self[:estimated_SS_benefit] = monthly_income
   end
 
-  private
-
-    def backwards_project_income(years)
-      # for every year between current age and 22
-        # create an IncomeYear instance
-        # with previous year's income minus 2%
-        # save it in current person's income_year array
-    end 
-
-    def forwards_project_income(years)
-      # for every year between current age and 67
-        # create an IncomeYear instance
-        # with previous year's income plus 2%
-        # save it in current person's income_year array
+  def backwards_project_income(years)
+    this_year = Date.today.year
+    this_years_income = self[:current_income]
+    # for every year between current age and 22
+    years.times do 
+      # income is previous year's income minus 2%
+      this_year = this_year - 1 
+      this_years_income = (this_years_income * 0.98).round(2)
+      IncomeYear.create(person_id: self[:id], year: this_year, income: this_years_income)
     end
+  end 
 
-    def calculate_AMIE(age, current_income)
-
+  def forwards_project_income(years)
+    this_year = Date.today.year
+    this_years_income = self[:current_income]
+    # for every year between current age and 67
+    years.times do 
+      # income is previous year's income plus 2%
+      this_year = this_year + 1 
+      this_years_income = (this_years_income * 1.02).round(2)
+      IncomeYear.create(person_id: self[:id], year: this_year, income: this_years_income)
     end
+  end
 
-    def convert_AMIE_to_benefits(monthly_earnings)
+  def calculate_amie(age, current_income)
 
-    end
+  end
+
+  def convert_amie_to_benefits(monthly_earnings)
+
+  end
 end
