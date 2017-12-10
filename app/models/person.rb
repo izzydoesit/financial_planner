@@ -4,61 +4,58 @@ class Person < ApplicationRecord
   before_validation :set_age, :set_life_expectancy, :set_retirement_age
   before_save :calculate_benefits
 
-  def set_current_income(income)
-    self[:current_income] = income
-  end
-
-  def set_age
-    self[:age] = ((Date.today - self[:birthday].to_date)/365.25).to_i
-  end
-
-  def set_life_expectancy
-    if self[:sex] == 'M'
-      self[:life_expectancy] = 76
-    else
-      self[:life_expectancy] = 81
-    end
-  end
-
-  def set_retirement_age
-    retirement_age = 67.0
-    birth_year = self[:birthday].year
-
-    case birth_year
-      when 1938
-        retirement_age = 65.2
-      when 1939
-        retirement_age = 65.4
-      when 1940
-        retirement_age = 65.5
-      when 1941
-        retirement_age = 65.7
-      when 1942
-        retirement_age = 65.8
-      when 1943..1954
-        retirement_age = 66.0
-      when 1955
-        retirement_age = 66.2
-      when 1956
-        retirement_age = 66.3
-      when 1957
-        retirement_age = 66.5
-      when 1958
-        retirement_age = 66.7
-      when 1959
-        retirement_age = 66.8
-      end
-
-      self[:full_retirement_age] = retirement_age
-  end
-
   def calculate_benefits
+    create_current_income_record
     project_income 
     calculate_monthly_amie
     calculate_pia
   end
 
-   
+  private
+
+    def set_age
+      self[:age] = ((Date.today - self[:birthday].to_date)/365.25).to_i
+    end
+
+    def set_life_expectancy
+      if self[:sex] == 'M'
+        self[:life_expectancy] = 76
+      else
+        self[:life_expectancy] = 81
+      end
+    end
+
+    def set_retirement_age
+      retirement_age = 67.0
+      birth_year = self[:birthday].year
+
+      case birth_year
+        when 1938
+          retirement_age = 65.2
+        when 1939
+          retirement_age = 65.4
+        when 1940
+          retirement_age = 65.5
+        when 1941
+          retirement_age = 65.7
+        when 1942
+          retirement_age = 65.8
+        when 1943..1954
+          retirement_age = 66.0
+        when 1955
+          retirement_age = 66.2
+        when 1956
+          retirement_age = 66.3
+        when 1957
+          retirement_age = 66.5
+        when 1958
+          retirement_age = 66.7
+        when 1959
+          retirement_age = 66.8
+        end
+
+      self[:full_retirement_age] = retirement_age
+    end
 
     def create_current_income_record
       self.income_years.build(income: self[:current_income], year: Date.today.year)
