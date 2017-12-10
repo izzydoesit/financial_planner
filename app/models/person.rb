@@ -2,8 +2,8 @@ class Person < ApplicationRecord
   has_many :income_years
   accepts_nested_attributes_for :income_years, reject_if: :all_blank
   
-  before_save :set_age, :set_life_expectancy
-  after_save :create_current_income_record, :project_income, :calculate_monthly_amie
+  before_save :set_age, :set_life_expectancy, :set_retirement_age
+  after_save :create_current_income_record, :project_income, :calculate_monthly_amie, :calculate_pia
   # before_save :calculate_first_SS_check
 
   def set_current_income(income)
@@ -22,14 +22,46 @@ class Person < ApplicationRecord
     end
   end
 
+  def set_retirement_age
+    retirement_age = 67.0
+    birth_year = self[:birthday].year
+
+    case birth_year
+      when 1938
+        retirement_age = 65.2
+      when 1939
+        retirement_age = 65.4
+      when 1940
+        retirement_age = 65.5
+      when 1941
+        retirement_age = 65.7
+      when 1942
+        retirement_age = 65.8
+      when 1943..1954
+        retirement_age = 66.0
+      when 1955
+        retirement_age = 66.2
+      when 1956
+        retirement_age = 66.3
+      when 1957
+        retirement_age = 66.5
+      when 1958
+        retirement_age = 66.7
+      when 1959
+        retirement_age = 66.8
+      end
+
+      self[:full_retirement_age] = retirement_age
+  end
+
   def create_current_income_record
     self.income_years.create(income: self[:current_income], year: Date.today.year)
   end
 
   def calculate_first_SS_check
     # project earnings history
-    backwards_project_income 
-    forwards_project_income
+    create_current_income_record
+    project_income 
     # calculate Average Monthly Indexed Earnings (top 35 earning years)
     calculate_monthly_amie
     # convert AMIE to benefits
@@ -39,8 +71,6 @@ class Person < ApplicationRecord
     # adjust benefits according to year they take
     adjust_benefits
     # benefit reduction +/- 36 months
-
-    self[:estimated_SS_benefit] = monthly_income
   end
 
   def project_income
@@ -73,12 +103,62 @@ class Person < ApplicationRecord
   end
 
   def calculate_pia
+    maximum_point = 10600
+    maximum_amie = self[:monthly_amie_base] > maximum_point ? maximum_point : self[:monthly_amie_base]
+    bend_point_1 = 885
+    bend_point_2 = 5336
+    benefit = 0
     
+    if maximum_amie >= bend_point_2
+      benefit += (maximum_amie - bend_point_2) * 0.15
+      benefit += (bend_point_2 - bend_point_1) * 0.35
+      benefit += bend_point_1 * 0.90
+    elsif maximum_amie >= bend_point_1
+      benefit += (maximum_amie - bend_point_1) * 0.35
+      benefit += bend_point_1 * 0.90
+    else
+      benefit += maximum_amie * 0.9
+    end
+
+    self[:maximum_benefit] = benefit.round(2)
+
+    full_retirement_date = self[:birthday] >> (self[:full_retirement_age] * 12)
+    months_from_retirement = ((full_retirement_date - self[:claim_date]) / 30).to_i
+    if months_from_retirement.abs >= 1 
+      adjust_benefits(months_from_retirement)
+    end
   end
 
   def compare_spousal_benefit
   end
 
-  def adjust_benefits
+  def adjust_benefits(difference)
+    adjusted_benefit = self[:maximum_benefit]
+    if difference > 0   # deduct benefits
+      months = [difference, 36].min 
+      months.times do |i|
+        adjusted_benefit -=  (adjusted_benefit * (5/9 * 0.01))
+      end 
+      if difference > 36
+        months_over_36 = (difference - 36).to_i
+        months_over_36.times do
+          adjusted_benefit -= (adjusted_benefit * (5/12 * 0.01))
+        end
+      end
+    else   # add benefits
+      months = [difference.abs, 36].min
+      months.times do
+        adjusted_benefit +=  (adjusted_benefit * (5.0/9 * 0.01))
+      end 
+      
+      if difference.abs > 36
+        months_over_36 = (difference.abs - 36).to_i
+        months_over_36.times do
+          adjusted_benefit += (adjusted_benefit * (5.0/12 * 0.01))
+        end
+      end
+    end
+    
+    self[:adjusted_benefit] = adjusted_benefit.round(2)
   end
 end
