@@ -1,4 +1,6 @@
 class Person < ApplicationRecord
+  belongs_to :spouse, class_name: "Person", foreign_key: "spouse_id", required: false
+  has_one :spouse, class_name: "Person", foreign_key: "spouse_id"
   has_many :income_years
   accepts_nested_attributes_for :income_years, reject_if: :all_blank
   before_validation :set_age, :set_life_expectancy, :set_retirement_age

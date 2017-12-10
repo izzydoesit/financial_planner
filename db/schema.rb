@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171209211227) do
+ActiveRecord::Schema.define(version: 20171210081616) do
 
   create_table "income_years", force: :cascade do |t|
     t.string   "year"
@@ -35,6 +35,8 @@ ActiveRecord::Schema.define(version: 20171209211227) do
     t.float    "adjusted_benefit"
     t.datetime "created_at",                          null: false
     t.datetime "updated_at",                          null: false
+    t.integer  "spouse_id"
+    t.index ["spouse_id"], name: "index_people_on_spouse_id"
   end
 
 end
