@@ -1,2 +1,41 @@
 <h1>People#new</h1>
 <p>Find me in app/views/people/new.html.erb</p>
+
+<div class="container">
+
+  <%= form_for @person do |f| %>
+
+
+
+    <div class="sex-field">
+      <%= f.label :sex %>
+      <%= f.label 'Male' %>
+      <%= f.radio_button :sex, 'M' %>
+      <%= f.label 'Female' %>
+      <%= f.radio_button :sex, 'F' %>
+    </div>
+
+    <div class="birthday-field">
+      <%= f.label :birthday %>
+      <%= f.date_field :birthday %>
+    </div>
+
+    <div class="current-income-field">
+      <%= f.fields_for :income_years, @income_year do |ff| %>
+        <div>
+          <%= ff.label :income, 'Current Income' %>
+          <%= ff.text_field :income %>
+          <%= ff.hidden_field( :year, value: Date.today.year) %>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="claim-date-field">
+      <%= f.label :claim_date %>
+      <%= f.date_field :claim_date %>
+    </div>
+
+    <%= f.submit 'Submit' %>
+  <% end %>
+    
+</div>
