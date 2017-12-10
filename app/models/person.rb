@@ -1,6 +1,6 @@
 class Person < ApplicationRecord
-  belongs_to :spouse, class_name: "Person", foreign_key: "spouse_id", required: false
   has_one :spouse, class_name: "Person", foreign_key: "spouse_id"
+  belongs_to :spouse, class_name: "Person", foreign_key: "spouse_id", required: false
   has_many :income_years
   accepts_nested_attributes_for :income_years, reject_if: :all_blank
   before_validation :set_age, :set_life_expectancy, :set_retirement_age
@@ -10,7 +10,11 @@ class Person < ApplicationRecord
     create_current_income_record
     project_income 
     calculate_monthly_amie
-    calculate_pia
+    calculate_primary_insurance_amount
+
+    if !self.spouse.nil?
+      calculate_spousal_benefit
+    end
   end
 
   private
@@ -92,9 +96,9 @@ class Person < ApplicationRecord
       self[:monthly_amie_base] = ((incomes.inject(0) { |sum, i| sum + i } / incomes.size) / 12).round(2)
     end
 
-    def calculate_pia
+    def calculate_primary_insurance_amount
       maximum_point = 10600
-      maximum_amie = self[:monthly_amie_base] > maximum_point ? maximum_point : self[:monthly_amie_base]
+      maximum_amie = self[:monthly_amie_base] >= maximum_point ? maximum_point : self[:monthly_amie_base]
       bend_point_1 = 885
       bend_point_2 = 5336
       benefit = 0
@@ -118,7 +122,9 @@ class Person < ApplicationRecord
       end
     end
 
-    def compare_spousal_benefit
+    def calculate_spousal_benefit
+      spouse = Person.find(self.spouse)
+      self[:spousal_benefit] = spouse.adjusted_benefit * 0.5
     end
 
     def adjust_benefits(difference)
