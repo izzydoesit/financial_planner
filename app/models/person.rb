@@ -1,8 +1,8 @@
 class Person < ApplicationRecord
   has_many :income_years
   accepts_nested_attributes_for :income_years, reject_if: :all_blank
-  before_save :set_age, :set_life_expectancy, :set_retirement_age
-  after_save :calculate_benefits
+  before_validation :set_age, :set_life_expectancy, :set_retirement_age
+  before_save :calculate_benefits
 
   def set_current_income(income)
     self[:current_income] = income
@@ -53,18 +53,15 @@ class Person < ApplicationRecord
   end
 
   def calculate_benefits
-    create_current_income_record
     project_income 
     calculate_monthly_amie
     calculate_pia
-    compare_spousal_benefit
-    adjust_benefits
   end
 
-  private 
+   
 
     def create_current_income_record
-      self.income_years.create(income: self[:current_income], year: Date.today.year)
+      self.income_years.build(income: self[:current_income], year: Date.today.year)
     end
 
     def project_income
@@ -77,7 +74,7 @@ class Person < ApplicationRecord
       previous_years.times do |i|
         previous_year = this_year - i - 1
         previous_year_income = (this_year_income * 0.98**(i+1)).round(2)
-        self.income_years.create(year: previous_year, income: previous_year_income)
+        self.income_years.build(year: previous_year, income: previous_year_income)
       end
 
       this_year = Date.today.year
@@ -86,7 +83,7 @@ class Person < ApplicationRecord
       years_left.times do |i|
         future_year = this_year + (i + 1)
         future_year_income = (this_year_income * 1.02**(i+1)).round(2)
-        self.income_years.create(year: future_year, income: future_year_income)
+        self.income_years.build(year: future_year, income: future_year_income)
       end
     end 
 
@@ -115,7 +112,6 @@ class Person < ApplicationRecord
       end
 
       self[:maximum_benefit] = benefit.round(2)
-
       full_retirement_date = self[:birthday] >> (self[:full_retirement_age] * 12)
       months_from_retirement = ((full_retirement_date - self[:claim_date]) / 30).to_i
       if months_from_retirement.abs >= 1 
@@ -128,16 +124,16 @@ class Person < ApplicationRecord
 
     def adjust_benefits(difference)
       adjusted_benefit = self[:maximum_benefit]
+      
       if difference > 0   # deduct benefits
         months = [difference, 36].min 
         months.times do |i|
-          adjusted_benefit -=  (adjusted_benefit * (5/9 * 0.01))
+          adjusted_benefit -=  (adjusted_benefit * (5.0/9 * 0.01))
         end 
-        
         if difference > 36
           months_over_36 = (difference - 36).to_i
           months_over_36.times do
-            adjusted_benefit -= (adjusted_benefit * (5/12 * 0.01))
+            adjusted_benefit -= (adjusted_benefit * (5.0/12 * 0.01))
           end
         end
       else   # add benefits
