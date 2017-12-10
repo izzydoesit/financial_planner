@@ -1,4 +1,4 @@
-## Financial Planner
+# Financial Planner
 
 This application estimates a person's first social security benefits check given a birthdate, current income, and projected claim date.
 
