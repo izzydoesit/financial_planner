@@ -2,17 +2,18 @@
 <p>Find me in app/views/people/show.html.erb</p>
 
 <div class="container">
-  <p>birthday:<%= @person.birthday %></p>
-  <p>age:<%= @person.age %></p>
-  <p>full retirement age:<%= @person.full_retirement_age %></p>
-  <p>sex:<%= @person.sex %></p>
-  <p>current income:<%= number_to_currency(@person.current_income) %></p>
-  <p>life expectancy:<%= @person.life_expectancy %></p>
-  <p>claim date:<%= @person.claim_date %></p>
-  <p>spousal benefits:<%= @person.spousal_benefits %></p>
-  <p>Monthly AMIE:<%= @person.monthly_amie_base %></p>
-  <p>estimated maximum benefit:<%= @person.maximum_benefit %></p>
-  <p>estimated adjusted benefit:<%= @person.adjusted_benefit %></p>
+  <p>age: <%= @person.age %></p>
+  <p>birthday: <%= @person.birthday %></p>
+  <p>current income: <%= number_to_currency(@person.current_income) %></p>
+  <p>full retirement age: <%= @person.full_retirement_age %></p>
+  <p>full retirement date: <%= @person.birthday >> (@person.full_retirement_age * 12) %></p>
+  <p>sex: <%= @person.sex %></p>
+  <p>life expectancy: <%= @person.life_expectancy %></p>
+  <p>claim date: <%= @person.claim_date %></p>
+  <p>spousal benefits: <%= @person.spousal_benefits %></p>
+  <p>Monthly AMIE: <%= number_to_currency(@person.monthly_amie_base) %></p>
+  <p>estimated maximum benefit: <%= number_to_currency(@person.maximum_benefit) %></p>
+  <p>estimated adjusted benefit: <%= number_to_currency(@person.adjusted_benefit) %></p>
 </div>
 
 <%= link_to '<~~~ Back', new_person_path %>
