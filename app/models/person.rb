@@ -3,7 +3,7 @@ class Person < ApplicationRecord
   accepts_nested_attributes_for :income_years, reject_if: :all_blank
   
   before_save :set_age, :set_life_expectancy
-  after_save :create_current_income_record, :backwards_project_income, :forwards_project_income, :calculate_monthly_amie
+  after_save :create_current_income_record, :project_income, :calculate_monthly_amie
   # before_save :calculate_first_SS_check
 
   def set_current_income(income)
@@ -43,31 +43,28 @@ class Person < ApplicationRecord
     self[:estimated_SS_benefit] = monthly_income
   end
 
-  def backwards_project_income
-    # every year's income is previous year's income minus 2%
-    years_to_project = self[:age] - 22
+  def project_income
+    # assume growth rate of 2%
+    previous_years = self[:age] - 22
+    years_left = 70 - self[:age]
     this_year = Date.today.year
-    this_years_income = self[:current_income]
+    this_year_income = self[:current_income]
 
-    years_to_project.times do 
-      this_year = this_year - 1 
-      this_years_income = (this_years_income * 0.98).round(2)
-      self.income_years.create(year: this_year, income: this_years_income)
+    previous_years.times do |i|
+      previous_year = this_year - i - 1
+      previous_year_income = (this_year_income * 0.98**(i+1)).round(2)
+      self.income_years.create(year: previous_year, income: previous_year_income)
+    end
+
+    this_year = Date.today.year
+    this_year_income = self[:current_income]
+
+    years_left.times do |i|
+      future_year = this_year + (i + 1)
+      future_year_income = (this_year_income * 1.02**(i+1)).round(2)
+      self.income_years.create(year: future_year, income: future_year_income)
     end
   end 
-
-  def forwards_project_income
-    # every year's income is previous year's income plus 2%
-    years_to_project = 70 - self[:age]
-    this_year = Date.today.year
-    this_years_income = self[:current_income]
-
-    years_to_project.times do 
-      this_year = this_year + 1 
-      this_years_income = (this_years_income * 1.02).round(2)
-      self.income_years.create(year: this_year, income: this_years_income)
-    end
-  end
 
   def calculate_monthly_amie
     # average income of top 35 years
@@ -76,7 +73,7 @@ class Person < ApplicationRecord
   end
 
   def calculate_pia
-
+    
   end
 
   def compare_spousal_benefit
