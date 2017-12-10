@@ -2,13 +2,11 @@ class PeopleController < ApplicationController
 
   def new
     @person = Person.new
-    @income_year = @person.income_years.build
   end
 
   def create
     @person = Person.new(person_params)
-    @person.set_current_income(params[:person][:income_years_attributes]['0'][:income])
-    
+
     if @person.save
       redirect_to @person, alert: "Person created successfully!"
     else
@@ -23,6 +21,6 @@ class PeopleController < ApplicationController
   private
 
     def person_params
-      params.require(:person).permit(:sex, :birthday,  :claim_date, income_years_attributes: [:income, :year])
+      params.require(:person).permit(:sex, :birthday,  :claim_date, :current_income)
     end
 end

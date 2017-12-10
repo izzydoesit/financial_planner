@@ -8,7 +8,7 @@
 
 
     <div class="sex-field">
-      <%= f.label :sex %>
+      <%= f.label 'Sex: ' %>
       <%= f.label 'Male' %>
       <%= f.radio_button :sex, 'M' %>
       <%= f.label 'Female' %>
@@ -16,22 +16,17 @@
     </div>
 
     <div class="birthday-field">
-      <%= f.label :birthday %>
+      <%= f.label 'Birthday: ' %>
       <%= f.date_field :birthday %>
     </div>
 
     <div class="current-income-field">
-      <%= f.fields_for :income_years, @income_year do |ff| %>
-        <div>
-          <%= ff.label :income, 'Current Income' %>
-          <%= ff.text_field :income %>
-          <%= ff.hidden_field( :year, value: Date.today.year) %>
-        </div>
-      <% end %>
+      <%= f.label :current_income, 'Current Income: ' %>
+      <%= f.text_field :current_income %>
     </div>
 
     <div class="claim-date-field">
-      <%= f.label :claim_date %>
+      <%= f.label 'Desired Claim Date: ' %>
       <%= f.date_field :claim_date %>
     </div>
 
